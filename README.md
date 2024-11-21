@@ -63,7 +63,9 @@ FFmpeg is required for the script as well, and can be installed following these 
    Ensure FFmpeg is installed and accessible from the command line.
    
       ffmpeg -version
-      
+## Recommendations
+I recommend setting TubeArchivist to Delete "watched" files... this script sets the watched status, so after TA processes the deletion, you'll only have one copy of the video files. I also recommend importing as a library in Jellyfin.
+
 ## Contributing
 Contributions are welcome! Please read the [CONTRIBUTING](CONTRIBUTING.md) guidelines before submitting a pull request.
 
