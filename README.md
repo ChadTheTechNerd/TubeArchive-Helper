@@ -71,5 +71,5 @@ Contributions are welcome! Please read the [CONTRIBUTING](CONTRIBUTING.md) guide
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
-For any inquiries or feedback, you can reach out to the project maintainer(s) at your_email@example.com.
+For any inquiries or feedback, you can reach out to the project maintainer(s) at chadthetechnerd@gmail.com.
 
