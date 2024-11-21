@@ -50,10 +50,6 @@ Logs are saved to `tubearchivist_2.log`.
 
 FFmpeg is required for the script as well, and can be installed following these directions for Linux:
    
-   Linux
-   
-   Open Terminal.
-   
    Update your package list and install FFmpeg using your package manager:
    
       For Debian-based distributions (e.g., Ubuntu):
