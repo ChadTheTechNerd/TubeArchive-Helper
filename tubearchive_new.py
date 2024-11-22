@@ -249,7 +249,8 @@ def process_files_in_directory(directory, token):
                     if metadata:
                         title = metadata['data'].get('title', video_id).replace(' ', '_').replace('/', '_')
                         channel_name = metadata['data']['channel'].get('channel_name', 'Unknown_Channel').replace(' ', '_').replace('/', '_')
-                        dst = os.path.join(TARGET_FOLDER, channel_name, title + '.mp4')
+                        dst_folder = os.path.join(TARGET_FOLDER, channel_name, title)
+                        dst = os.path.join(dst_folder, title + '.mp4')
 
                         # Skip files that have already been copied
                         if os.path.exists(dst):
