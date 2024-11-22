@@ -79,12 +79,12 @@ def fetch_metadata(video_id, token):
         logger.error(f"Request failed: {e}")
         return None
 
-def download_image(image_url, image_path, token):
-    logger.debug(f"Downloading image from {image_url} to {image_path}")
-    if not image_url.startswith('http://') and not image_url.startswith('https://'):
-        image_url = f"{THUMB_BASE_URL.rstrip('/')}/{image_url.lstrip('/')}"
+def download_thumbnail(vid_thumb_url, thumb_path, token):
+    logger.debug(f"Downloading thumbnail from {vid_thumb_url} to {thumb_path}")
+    if not vid_thumb_url.startswith('http://') and not vid_thumb_url.startswith('https://'):
+        vid_thumb_url = f"{THUMB_BASE_URL.rstrip('/')}/{vid_thumb_url.lstrip('/')}"
     headers = {'Authorization': f'Token {token}'}
-    logger.debug(f"Complete image URL: {image_url}")
+    logger.debug(f"Complete thumbnail URL: {vid_thumb_url}")
     logger.debug(f"Request headers: {headers}")
 
     # Set up retry logic
@@ -93,22 +93,17 @@ def download_image(image_url, image_path, token):
     session.mount('https://', HTTPAdapter(max_retries=retries))
 
     try:
-        response = session.get(image_url, headers=headers, stream=True, timeout=30)
+        response = session.get(vid_thumb_url, headers=headers, stream=True, timeout=30)
         response.raise_for_status()
-        with open(image_path, 'wb') as f:
+        with open(thumb_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
-        logger.info(f"Image downloaded at {image_path}")
+        logger.info(f"Thumbnail downloaded at {thumb_path}")
     except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to download image: {e}")
+        logger.error(f"Failed to download thumbnail: {e}")
 
-def add_season_to_metadata(metadata):
-    if 'data' in metadata:
-        metadata['data']['season'] = "1"
-    return metadata
-
-def copy_video_and_embed_metadata(src, dst, metadata, token, video_id):
-    logger.debug(f"Copying video from {src} to {dst} with metadata {metadata} and video ID {video_id}")
+def copy_video_and_embed_metadata(src, dst, metadata, token):
+    logger.debug(f"Copying video from {src} to {dst} with metadata {metadata}")
     try:
         if not os.path.exists(src):
             logger.error(f"Source file does not exist: {src}")
@@ -122,19 +117,11 @@ def copy_video_and_embed_metadata(src, dst, metadata, token, video_id):
         shutil.copy2(src, dst)
         logger.info(f"Copied video from {src} to {dst}")
 
-        # Add season to metadata
-        metadata = add_season_to_metadata(metadata)
-
-        # Set TARGET_FOLDER to the destination where mp4 files are output to
-        target_folder = os.path.dirname(dst)
-
-        # Extract the output filename (title.mp4) minus the mp4
-        output_filename = os.path.splitext(os.path.basename(dst))[0]
-
         # Output all metadata to a .nfo file in the output directory
-        nfo_script_path = './nfo_process.py'  # Updated path to current directory
-        subprocess.run(['python3', nfo_script_path, output_filename, json.dumps(metadata), target_folder], check=True)
-        logger.info(f"Called nfo_process script for {output_filename}")
+        nfo_path = os.path.splitext(dst)[0] + '.nfo'
+        with open(nfo_path, 'w') as nfo_file:
+            json.dump(metadata, nfo_file, indent=4)
+        logger.info(f"Exported metadata to {nfo_path}")
 
         # Prepare metadata for embedding
         metadata_args = []
@@ -164,22 +151,7 @@ def copy_video_and_embed_metadata(src, dst, metadata, token, video_id):
         vid_thumb_url = metadata['data'].get('vid_thumb_url')
         if vid_thumb_url:
             thumb_path = os.path.splitext(dst)[0] + '.jpg'
-            download_image(vid_thumb_url, thumb_path, token)
-
-        # Download channel thumbnail if available
-        channel_thumb_url = metadata['data']['channel'].get('channel_thumb_url')
-        if channel_thumb_url:
-            channel_name = metadata['data']['channel'].get('channel_name', 'Unknown_Channel').replace(' ', '_').replace('/', '_')
-            channel_thumb_path = os.path.join(os.path.dirname(dst), f'{channel_name}_thumb.jpg')
-            download_image(channel_thumb_url, channel_thumb_path, token)
-
-        # Download channel TV art if available
-        channel_tvart_url = metadata['data']['channel'].get('channel_tvart_url')
-        if channel_tvart_url:
-            channel_name = metadata['data']['channel'].get('channel_name', 'Unknown_Channel').replace(' ', '_').replace('/', '_')
-            channel_tvart_path = os.path.join(os.path.dirname(dst), f'{channel_name}_tvart.jpg')
-            download_image(channel_tvart_url, channel_tvart_path, token)
-
+            download_thumbnail(vid_thumb_url, thumb_path, token)
     except OSError as e:
         logger.error(f"Failed to copy video or export metadata: {e}")
 
@@ -270,7 +242,7 @@ def process_files_in_directory(directory, token):
                         logger.debug(f"Destination path: {dst}, Title: {title}, Channel Name: {channel_name}")
 
                         # Copy video and embed metadata
-                        copy_video_and_embed_metadata(src, dst, metadata, token, video_id)
+                        copy_video_and_embed_metadata(src, dst, metadata, token)
 
                         # Mark the file as watched
                         update_watched_status(video_id, token)
