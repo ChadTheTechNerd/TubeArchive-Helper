@@ -2,7 +2,7 @@
 
 ## Description
 The TubeArchivist Metadata Embedder automates the process of copying video files from a specified source directory to a target directory, renaming the file to it's correct title, 
-embedding metadata directly into the video files, and downloading associated thumbnails. As well as creating metadata.nfo files for each video. I wrote this script to be the go-between
+embedding metadata directly into the video files, creating a .nfo file, and downloading associated thumbnails for each video. I wrote this script to be the go-between
 from TubeArchivist to Jellyfin.
 
 ## Table of Contents
