@@ -11,6 +11,7 @@
 #        TA_API_USERNAME - The username for the TubeArchivist API                                           #
 #        TA_API_PASSWORD - The password for the TubeArchivist API                                           #
 #############################################################################################################
+
 import os
 import sys
 import shutil
@@ -41,6 +42,7 @@ TA_API_USERNAME = os.getenv('TA_API_USERNAME')
 TA_API_PASSWORD = os.getenv('TA_API_PASSWORD')
 THUMB_BASE_URL = os.getenv('THUMB_BASE_URL')  # Base URL for thumbnail paths
 
+# Function to log in to the TubeArchivist API and retrieve a token
 def login():
     login_url = f'{TA_API_URL}/login/'
     data = {
@@ -60,6 +62,7 @@ def login():
             logger.error(f"Response content: {e.response.content.decode()}")
         return None
 
+# Function to fetch metadata from TubeArchivist for a given video ID
 def fetch_metadata(video_id, token):
     logger.debug(f"Fetching metadata for video ID: {video_id}")
     headers = {'Authorization': f'Token {token}'}
@@ -79,6 +82,7 @@ def fetch_metadata(video_id, token):
         logger.error(f"Request failed: {e}")
         return None
 
+# Function to download an image from a TubeArchivist and save it to a specified path
 def download_image(image_url, image_path, token):
     logger.debug(f"Downloading image from {image_url} to {image_path}")
     if not image_url.startswith('http://') and not image_url.startswith('https://'):
@@ -102,11 +106,13 @@ def download_image(image_url, image_path, token):
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to download image: {e}")
 
+# Function to add season information to metadata
 def add_season_to_metadata(metadata):
     if 'data' in metadata:
         metadata['data']['season'] = "1"
     return metadata
 
+# Function to copy a video file and embed metadata into it
 def copy_video_and_embed_metadata(src, dst, metadata, token, video_id):
     logger.debug(f"Copying video from {src} to {dst} with metadata {metadata} and video ID {video_id}")
     try:
@@ -183,6 +189,7 @@ def copy_video_and_embed_metadata(src, dst, metadata, token, video_id):
     except OSError as e:
         logger.error(f"Failed to copy video or export metadata: {e}")
 
+# Function to update the watched status of a video ensuring that TubeArchivist is marked as watched, and that if the script runs again it will not reprocess the video.
 def update_watched_status(video_id, token, position=100):
     progress_url = f'{TA_API_VIDEO_URL}/{video_id}/progress/'
     watched_url = f'{TA_API_URL}/watched/'
@@ -206,39 +213,21 @@ def update_watched_status(video_id, token, position=100):
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to mark video ID: {video_id} as watched: {e}")
 
+# Function to check the watched status of a video (to avoid reprocessing)
 def check_watched_status(video_id, token):
-    # Construct the URL to check the watched status of the video
     url = f'{TA_API_VIDEO_URL}/{video_id}/progress/'
     headers = {'Authorization': f'Token {token}'}
     try:
-        # Send a GET request to the API to check the watched status
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()
         logger.debug(f"Watched status response for video ID {video_id}: {data}")
-        # Return the watched status from the response data
         return data.get('watched', False)
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to fetch watched status for video ID: {video_id}: {e}")
         return False
 
-def fetch_video_metadata(video_id):
-    api_url = f'{TA_API_VIDEO_URL}/{video_id}'
-    logger.debug(f"Fetching metadata for video ID: {video_id}")
-    logger.debug(f"API URL: {api_url}")
-    try:
-        response = requests.get(api_url, timeout=10, allow_redirects=True)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        if response.status_code == 404:
-            logger.error(f"Video ID {video_id} not found: {response.status_code} - {response.text}")
-        else:
-            logger.error(f"HTTP error occurred: {http_err}")
-    except Exception as err:
-        logger.error(f"Other error occurred: {err}")
-    return None
-
+# Function to process all video files in a the specified directory
 def process_files_in_directory(directory, token):
     for root, dirs, files in os.walk(directory):
         for filename in files:
@@ -279,6 +268,7 @@ def process_files_in_directory(directory, token):
                 except Exception as e:
                     logger.error(f"Unexpected error while processing file {filename}: {e}")
 
+# Main script execution
 if __name__ == "__main__":
     logger.debug("Script started")
     if not all([TA_MEDIA_FOLDER, TARGET_FOLDER, TA_API_VIDEO_URL, TA_API_USERNAME, TA_API_PASSWORD, THUMB_BASE_URL]):
