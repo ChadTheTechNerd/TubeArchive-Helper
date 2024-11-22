@@ -16,8 +16,8 @@ from TubeArchivist to Jellyfin.
 ## Installation
 1. **Clone the repository**:
    ```sh
-   git clone https://github.com/your_username/your_repository.git
-   cd your_repository
+   git clone https://github.com/ChadTheTechNerd/TubeArchive-Helper.git
+   cd TubeArchive-Helper
    ```
 2. **Create and activate a virtual environment**:
    ```sh
