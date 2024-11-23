@@ -39,6 +39,7 @@ from TubeArchivist to Jellyfin.
    TA_API_USERNAME=your_username
    TA_API_PASSWORD=your_password
    THUMB_BASE_URL=https://your_tubearchivist_url
+   SCRIPT_PATH=/the/directory/where/your/script/is/located
    ```
 2. **Run the script**:
    ```sh
@@ -64,7 +65,7 @@ FFmpeg is required for the script as well, and can be installed following these 
    
       ffmpeg -version
 ## Recommendations
-I recommend setting TubeArchivist to Delete "watched" files... this script sets the watched status, so after TA processes the deletion, you'll only have one copy of the video files. I also recommend importing as a library in Jellyfin.
+I recommend setting TubeArchivist to Delete "watched" files... this script sets the watched status, so after TA processes the deletion, you'll only have one copy of the video files. I also recommend importing as a shows library in Jellyfin.
 
 ## Contributing
 Contributions are welcome! Please read the [CONTRIBUTING](CONTRIBUTING.md) guidelines before submitting a pull request.
